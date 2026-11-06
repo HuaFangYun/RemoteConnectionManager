@@ -11,6 +11,9 @@
     publisher's signature. The script lists any binary that is still unsigned at the end, because
     the ASR rule checks DLLs as well.
 
+.PARAMETER Version
+    Overrides <Version> from Directory.Build.props, for example 1.2.0 from a release tag.
+
 .PARAMETER CertificateThumbprint
     Code signing certificate in Cert:\CurrentUser\My or Cert:\LocalMachine\My (an OV/EV cert, for
     example Certum, or a smart card / token certificate).
@@ -28,6 +31,7 @@
 param(
     [string]$Output = (Join-Path $PSScriptRoot '..\artifacts\publish'),
     [string]$Configuration = 'Release',
+    [string]$Version,
 
     [Parameter(ParameterSetName = 'Certificate', Mandatory)]
     [string]$CertificateThumbprint,
@@ -47,7 +51,9 @@ $project = Join-Path $root 'src\RemoteConnectionManager.App\RemoteConnectionMana
 
 Write-Host "Publishing $Configuration to $Output"
 if (Test-Path $Output) { Remove-Item $Output -Recurse -Force }
-dotnet publish $project -c $Configuration -r win-x64 --self-contained false -o $Output -p:DebugType=none
+$publishArgs = @($project, '-c', $Configuration, '-r', 'win-x64', '--self-contained', 'false', '-o', $Output, '-p:DebugType=none', '--nologo')
+if ($Version) { $publishArgs += "-p:Version=$Version" }
+dotnet publish @publishArgs
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed ($LASTEXITCODE)" }
 
 $ours = Get-ChildItem $Output -File | Where-Object { $_.Name -like 'RemoteConnectionManager*' -and $_.Extension -in '.exe', '.dll' }

@@ -60,6 +60,24 @@ The connections file is created on first run at
 folder, for example one that OneDrive or git syncs. Logs are under
 `%LOCALAPPDATA%\RemoteConnectionManager\logs`.
 
+### Installer
+
+Each release on the [Releases](https://github.com/jamtheradar/RemoteConnectionManager/releases)
+page has a `RemoteConnectionManager-<version>-setup.exe`. It installs for the current user by
+default (no admin needed), or for all users under Program Files if you choose that on the first
+page. It needs the [.NET 10 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)
+and warns you if it's missing. Your connections, settings and logs are kept on upgrade and uninstall.
+
+To build the installer yourself, install Inno Setup 6 (`winget install JRSoftware.InnoSetup`), then run:
+
+```
+./build/build-installer.ps1 -Version 0.2.0
+```
+
+The setup exe lands in `artifacts/installer`. The `Build` GitHub Actions workflow does the same on
+every push and pull request (download it from the run's artifacts), and publishes a release when
+you push a tag such as `v0.2.0`.
+
 ## Connections file
 
 ```json
@@ -204,7 +222,6 @@ src/RemoteConnectionManager.Plugins.OnePassword   1Password credential plugin (d
 src/RemoteConnectionManager.Plugins.ServerChecks  services and hardware over CIM (WinRM, then DCOM)
 src/RemoteConnectionManager.App    WPF shell: navigation tree, tabs, dashboard, editors, theme, Terminal/ (ConPTY stack copied from Drover)
 tests/                             xunit tests for Core, the Key Vault helpers and the plugins
-spike/RdpSpike                     phase 0 throwaway window, delete once the app has been tested on a real host
 docs/PLAN.md                       the plan
 ```
 

@@ -1,0 +1,114 @@
+name: Build
+
+# Every push to main, every PR and every manual run builds, tests and makes the installer, which
+# is kept as a workflow artifact. Pushing a tag like v0.2.0 does the same and then publishes a
+# GitHub release with the installer attached.
+#
+# build/build-installer.ps1 is the local equivalent and must stay in step with this file: both
+# call build/publish.ps1 and compile build/installer/RemoteConnectionManager.iss.
+#
+# Builds here are NOT signed yet. On a PAW the Defender ASR rule blocks unsigned exes unless the
+# install folder is excluded (see README, "Running on a locked down machine").
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # A tag build takes its version from the tag (v0.2.0 -> 0.2.0). Anything else uses the
+      # version in Directory.Build.props plus the run number (0.1.0.57), so every CI installer
+      # is distinguishable.
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          if ('${{ github.ref_type }}' -eq 'tag') {
+            $version = '${{ github.ref_name }}'.TrimStart('v')
+            if ($version -notmatch '^\d+\.\d+\.\d+(\.\d+)?$') {
+              throw "Tag '${{ github.ref_name }}' must look like v1.2.3 or v1.2.3.4."
+            }
+          } else {
+            $base = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version
+            $version = "$base.${{ github.run_number }}"
+          }
+          Write-Host "Version $version"
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build
+        run: dotnet build RemoteConnectionManager.slnx -c Release --nologo
+
+      # The SQL Server tests skip themselves when LocalDB isn't available on the runner.
+      - name: Test
+        run: dotnet test RemoteConnectionManager.slnx -c Release --no-build --nologo
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { throw 'Inno Setup install failed.' }
+          }
+
+      - name: Publish and build the installer
+        shell: pwsh
+        run: ./build/build-installer.ps1 -Version ${{ steps.version.outputs.version }}
+
+      - name: Verify the stamp
+        shell: pwsh
+        run: |
+          $expected = '${{ steps.version.outputs.version }}'
+          $actual = (Get-Item artifacts/publish/RemoteConnectionManager.exe).VersionInfo.ProductVersion -replace '\+.*$', ''
+          Write-Host "RemoteConnectionManager.exe reports $actual"
+          if ($actual -ne $expected) { throw "The published exe reports $actual but this build is $expected." }
+          $setup = "artifacts/installer/RemoteConnectionManager-$expected-setup.exe"
+          if (-not (Test-Path $setup)) { throw "$setup was not created." }
+          (Get-FileHash $setup -Algorithm SHA256).Hash.ToLowerInvariant() + "  $(Split-Path $setup -Leaf)" |
+            Set-Content -NoNewline -Encoding ascii "$setup.sha256"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: RemoteConnectionManager-${{ steps.version.outputs.version }}-setup
+          path: |
+            artifacts/installer/*.exe
+            artifacts/installer/*.sha256
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: RemoteConnectionManager-${{ needs.build.outputs.version }}-setup
+          path: installer
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create '${{ github.ref_name }}' installer/*
+          --repo '${{ github.repository }}'
+          --title 'Remote Connection Manager ${{ needs.build.outputs.version }}'
+          --generate-notes
