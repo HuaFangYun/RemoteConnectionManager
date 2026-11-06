@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Service status and hardware figures from a remote host over CIM: WinRM first, DCOM when WinRM
+       is not listening. Runs as the logged on user (Kerberos), never with a stored credential. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>RemoteConnectionManager.Plugins.ServerChecks</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Management.Infrastructure" Version="3.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RemoteConnectionManager.Plugins\RemoteConnectionManager.Plugins.csproj" />
+  </ItemGroup>
+</Project>

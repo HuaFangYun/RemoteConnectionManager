@@ -1,0 +1,151 @@
+<Window x:Class="RemoteConnectionManager.App.Views.VaultItemEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:RemoteConnectionManager.App.Views"
+        xmlns:vm="clr-namespace:RemoteConnectionManager.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:VaultItemEditorViewModel}"
+        Title="{Binding WindowTitle}" Width="560" SizeToContent="Height" MaxHeight="820"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Style="{StaticResource DarkWindow}">
+    <Window.Resources>
+        <views:StringToVisibilityConverter x:Key="StringToVis" />
+        <views:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis" />
+        <Style x:Key="Label" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+        <Style x:Key="TopLabel" TargetType="TextBlock" BasedOn="{StaticResource Label}">
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="0,8,12,0" />
+        </Style>
+        <Style x:Key="Field" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Margin" Value="0,3" />
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Style="{StaticResource Label}" Text="Name" />
+                <TextBox Grid.Column="1" Style="{StaticResource Field}" x:Name="NameBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         IsReadOnly="{Binding NameReadOnly, Mode=OneWay}"
+                         ToolTip="Letters, digits and dashes, up to 127 characters" />
+            </Grid>
+
+            <!-- Secret value -->
+            <Grid Visibility="{Binding ShowValue, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition /><RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource TopLabel}" Text="Value" />
+                <TextBox Grid.Column="1" Style="{StaticResource Field}" x:Name="ValueBox" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="96" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto"
+                         FontFamily="{StaticResource Font.Mono}" FontSize="12" />
+                <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Hint}"
+                           Text="Sent straight to the vault. Not saved anywhere else and not written to the log." />
+            </Grid>
+
+            <!-- Content type, expiry, enabled -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition /><RowDefinition /><RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource Label}" Text="Content type" Visibility="{Binding ShowContentType, Converter={StaticResource BoolToVis}}" />
+                <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding ContentType, UpdateSourceTrigger=PropertyChanged}"
+                         Visibility="{Binding ShowContentType, Converter={StaticResource BoolToVis}}" ToolTip="Optional, for example password or connection string" />
+                <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Expires" Visibility="{Binding ShowExpires, Converter={StaticResource BoolToVis}}" />
+                <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Expires, UpdateSourceTrigger=PropertyChanged}"
+                         Visibility="{Binding ShowExpires, Converter={StaticResource BoolToVis}}" ToolTip="A date such as 2027-06-30. Blank means it never expires." />
+                <CheckBox Grid.Row="2" Grid.Column="1" Content="Enabled" IsChecked="{Binding Enabled}" Margin="0,6"
+                          Visibility="{Binding ShowEnabled, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+
+            <!-- New key -->
+            <Grid Visibility="{Binding ShowKey, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition /><RowDefinition /><RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource Label}" Text="Key type" />
+                <ComboBox Grid.Column="1" Margin="0,3" ItemsSource="{Binding KeyTypes}" SelectedItem="{Binding KeyType}" />
+                <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="RSA size" Visibility="{Binding IsRsa, Converter={StaticResource BoolToVis}}" />
+                <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,3" ItemsSource="{Binding RsaSizes}" SelectedItem="{Binding RsaSize}"
+                          Visibility="{Binding IsRsa, Converter={StaticResource BoolToVis}}" />
+                <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="Curve" Visibility="{Binding IsEc, Converter={StaticResource BoolToVis}}" />
+                <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,3" ItemsSource="{Binding EcCurves}" SelectedItem="{Binding EcCurve}"
+                          Visibility="{Binding IsEc, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+
+            <!-- New self signed certificate -->
+            <Grid Visibility="{Binding ShowNewCertificate, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource Label}" Text="Subject" />
+                <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" ToolTip="For example CN=app.contoso.com" />
+                <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="DNS names" />
+                <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding DnsNames, UpdateSourceTrigger=PropertyChanged}" ToolTip="Optional, comma separated" />
+                <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="Valid for (months)" />
+                <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding ValidityMonths, UpdateSourceTrigger=PropertyChanged}" Width="80" HorizontalAlignment="Left" />
+                <CheckBox Grid.Row="3" Grid.Column="1" Content="Store as PEM instead of PFX" IsChecked="{Binding PemFormat}" Margin="0,6" />
+                <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource Hint}"
+                           Text="Self signed, RSA 2048, private key exportable. For a CA issued certificate, create it in the portal or import the PFX." />
+            </Grid>
+
+            <!-- Import certificate -->
+            <Grid Visibility="{Binding ShowImport, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition /><RowDefinition /><RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource Label}" Text="PFX file" />
+                <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding ImportFile, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="2" Content="Browse" Margin="6,3,0,3" Click="Browse_Click" />
+                <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="File password" />
+                <PasswordBox Grid.Row="1" Grid.Column="1" x:Name="PfxPassword" Margin="0,3" Padding="6,4"
+                             Background="{StaticResource Surface.Input}" Foreground="{StaticResource Chrome.Text}" BorderBrush="{StaticResource Surface.InputBorder}"
+                             CaretBrush="{StaticResource Chrome.Text}" />
+                <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource Hint}"
+                           Text="Leave the password blank if the file has none. It is passed to the vault for this import only." />
+            </Grid>
+
+            <TextBlock Text="{Binding ValidationMessage}" Foreground="{StaticResource Chrome.Danger}" Margin="0,12,0,0" TextWrapping="Wrap"
+                       Visibility="{Binding ValidationMessage, Converter={StaticResource StringToVis}}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                <Button Content="Cancel" IsCancel="True" MinWidth="90" />
+                <Button Content="{Binding SaveLabel}" IsDefault="True" Style="{StaticResource AccentButton}" MinWidth="90" Margin="8,0,0,0" Click="Save_Click" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

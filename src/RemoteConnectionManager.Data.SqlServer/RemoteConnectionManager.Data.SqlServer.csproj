@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>RemoteConnectionManager.Data.SqlServer</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- 6.x keeps Microsoft Entra authentication built in (7.x moved it to a separate package). -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.7" />
+    <!-- SqlClient 6.1.7 pulls 9.0.11, which has published advisories. -->
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="RemoteConnectionManager.Data.SqlServer.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Schema\*.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RemoteConnectionManager.Core\RemoteConnectionManager.Core.csproj" />
+  </ItemGroup>
+</Project>

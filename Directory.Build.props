@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Company>DataByte</Company>
+    <Product>RemoteConnectionManager</Product>
+    <Version>0.1.0</Version>
+    <Authors>JamTheRadar</Authors>
+    <Copyright>Copyright (c) 2026 James Noonan</Copyright>
+  </PropertyGroup>
+</Project>

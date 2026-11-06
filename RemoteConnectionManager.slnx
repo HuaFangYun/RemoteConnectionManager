@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RemoteConnectionManager.App/RemoteConnectionManager.App.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/RemoteConnectionManager.Core/RemoteConnectionManager.Core.csproj" />
+    <Project Path="src/RemoteConnectionManager.Data.SqlServer/RemoteConnectionManager.Data.SqlServer.csproj" />
+    <Project Path="src/RemoteConnectionManager.KeyVault/RemoteConnectionManager.KeyVault.csproj" />
+    <Project Path="src/RemoteConnectionManager.Plugins.OnePassword/RemoteConnectionManager.Plugins.OnePassword.csproj" />
+    <Project Path="src/RemoteConnectionManager.Plugins.ServerChecks/RemoteConnectionManager.Plugins.ServerChecks.csproj" />
+    <Project Path="src/RemoteConnectionManager.Plugins/RemoteConnectionManager.Plugins.csproj" />
+    <Project Path="src/RemoteConnectionManager.Rdp/RemoteConnectionManager.Rdp.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/RemoteConnectionManager.Core.Tests/RemoteConnectionManager.Core.Tests.csproj" />
+    <Project Path="tests/RemoteConnectionManager.Data.SqlServer.Tests/RemoteConnectionManager.Data.SqlServer.Tests.csproj" />
+  </Folder>
+</Solution>

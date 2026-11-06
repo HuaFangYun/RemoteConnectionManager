@@ -1,0 +1,396 @@
+<Window x:Class="RemoteConnectionManager.App.Views.EntryEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:RemoteConnectionManager.App.Views"
+        xmlns:vm="clr-namespace:RemoteConnectionManager.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:EntryEditorViewModel}"
+        Title="{Binding WindowTitle}" Width="560" SizeToContent="Height" MaxHeight="820"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Style="{StaticResource DarkWindow}">
+    <Window.Resources>
+        <views:StringToVisibilityConverter x:Key="StringToVis" />
+        <views:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis" />
+        <Style x:Key="Label" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+        <Style x:Key="Field" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Margin" Value="0,3" />
+        </Style>
+        <Style x:Key="Section" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,14,0,6" />
+        </Style>
+        <Style x:Key="Tri" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="IsThreeState" Value="True" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="ToolTip" Value="Tick = yes, untick = no, dash = inherit from the folder" />
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource Label}" Text="Name" />
+                <TextBox Grid.Column="1" Style="{StaticResource Field}" x:Name="NameBox" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Description" VerticalAlignment="Top" Margin="0,7,12,0" />
+                <DockPanel Grid.Row="1" Grid.Column="1">
+                    <DockPanel DockPanel.Dock="Bottom" Margin="0,0,0,4">
+                        <CheckBox x:Name="PreviewBox" DockPanel.Dock="Right" Content="Preview" Margin="8,0,0,0" VerticalAlignment="Center"
+                                  ToolTip="Show the description as it will look on the dashboard" />
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" VerticalAlignment="Center"
+                                   Text="Markdown: # heading, **bold**, *italic*, `code`, ``` code blocks, - lists, - [ ] tasks, | tables |, [link](https://...)" />
+                    </DockPanel>
+                    <Grid>
+                        <TextBox Style="{StaticResource Field}" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True" TextWrapping="Wrap" MinHeight="90" MaxHeight="260" VerticalScrollBarVisibility="Auto"
+                                 VerticalContentAlignment="Top" FontFamily="{StaticResource Font.Mono}" FontSize="12" AutomationProperties.Name="Description"
+                                 Visibility="{Binding IsChecked, ElementName=PreviewBox, Converter={StaticResource InverseBoolToVis}}" />
+                        <Border Margin="0,3" MinHeight="90" MaxHeight="260" Padding="8,6" BorderThickness="1"
+                                BorderBrush="{StaticResource Surface.InputBorder}" Background="{StaticResource Surface.Input}"
+                                Visibility="{Binding IsChecked, ElementName=PreviewBox, Converter={StaticResource BoolToVis}}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <views:MarkdownView Markdown="{Binding Description}" AutomationProperties.Name="Description preview" />
+                            </ScrollViewer>
+                        </Border>
+                    </Grid>
+                </DockPanel>
+                <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="Tags" Visibility="{Binding ShowTags, Converter={StaticResource BoolToVis}}" />
+                <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" ToolTip="Comma separated"
+                         Visibility="{Binding ShowTags, Converter={StaticResource BoolToVis}}" />
+                <CheckBox Grid.Row="3" Grid.Column="1" Content="Favourite" IsChecked="{Binding Favourite}" Margin="0,5" Visibility="{Binding ShowTags, Converter={StaticResource BoolToVis}}" />
+                <TextBlock Grid.Row="4" Style="{StaticResource Label}" Text="Icon colour" />
+                <DockPanel Grid.Row="4" Grid.Column="1" Margin="0,3">
+                    <Border DockPanel.Dock="Left" Width="24" Height="24" Margin="0,0,8,0" BorderThickness="1" BorderBrush="{StaticResource Surface.InputBorder}"
+                            Background="{StaticResource Surface.Input}" ToolTip="How the icon will look">
+                        <TextBlock Style="{StaticResource Glyph}" Text="{Binding PreviewGlyph}" FontSize="14"
+                                   Foreground="{Binding IconColourPreview, Converter={StaticResource IconBrush}}" />
+                    </Border>
+                    <TextBox DockPanel.Dock="Right" Width="90" Margin="8,0,0,0" Text="{Binding IconColour, UpdateSourceTrigger=PropertyChanged}"
+                             FontFamily="{StaticResource Font.Mono}" FontSize="12" VerticalContentAlignment="Center" AutomationProperties.Name="Icon colour hex"
+                             ToolTip="Any hex colour, for example #F85149. Blank inherits." />
+                    <ComboBox ItemsSource="{Binding ColourChoices}" SelectedItem="{Binding SelectedColour}" AutomationProperties.Name="Icon colour">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="12" Height="12" Margin="0,0,8,0" CornerRadius="2" VerticalAlignment="Center"
+                                            Background="{Binding Value, Converter={StaticResource IconBrush}}" />
+                                    <TextBlock Text="{Binding Label}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </DockPanel>
+                <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"
+                           Visibility="{Binding IsFolder, Converter={StaticResource BoolToVis}}"
+                           Text="Everything in this folder takes this colour unless it sets its own, for example red for production." />
+            </Grid>
+
+            <!-- RDP / folder defaults -->
+            <StackPanel Visibility="{Binding ShowRdpFields, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="{Binding RdpSectionTitle}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="90" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Host" Visibility="{Binding IsRdp, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding IsRdp, Converter={StaticResource BoolToVis}}" />
+                    <TextBlock Grid.Column="2" Style="{StaticResource Label}" Text="Port" Margin="12,0" />
+                    <TextBox Grid.Column="3" Style="{StaticResource Field}" Text="{Binding Port, UpdateSourceTrigger=PropertyChanged}" ToolTip="Blank = inherit or 3389" />
+
+                    <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Domain" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource Field}" Text="{Binding Domain, UpdateSourceTrigger=PropertyChanged}" ToolTip="Blank = inherit, then the logged on user's domain" />
+                    <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="User name" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource Field}" Text="{Binding UserName, UpdateSourceTrigger=PropertyChanged}" ToolTip="Blank = the logged on user, no prompt. Set a name and Windows will prompt for that account's password." />
+                </Grid>
+                <TextBlock Style="{StaticResource Muted}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap"
+                           Text="No passwords are stored. Blank user name signs in as you through CredSSP." />
+                <UniformGrid Columns="2" Margin="0,8,0,0">
+                    <CheckBox Style="{StaticResource Tri}" Content="Admin (console) session" IsChecked="{Binding AdminSession}" />
+                    <CheckBox Style="{StaticResource Tri}" Content="Keyboard pass through" IsChecked="{Binding KeyboardPassThrough}" />
+                    <CheckBox Style="{StaticResource Tri}" Content="Clipboard" IsChecked="{Binding RedirectClipboard}" />
+                    <CheckBox Style="{StaticResource Tri}" Content="Smart sizing (scale, no live resize)" IsChecked="{Binding SmartSizing}" />
+                </UniformGrid>
+
+                <!-- Sign in, credential protection and gateway -->
+                <TextBlock Style="{StaticResource Section}" Text="Sign in and gateway" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                        <RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Credential" />
+                    <ComboBox Grid.Column="1" Margin="0,3" ItemsSource="{Binding CredentialChoices}" SelectedItem="{Binding SelectedCredential}" DisplayMemberPath="Label" />
+
+                    <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Vault" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" />
+                    <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,3" IsEditable="True" ItemsSource="{Binding KnownVaults}"
+                              Text="{Binding CredentialVault, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}"
+                              ToolTip="Vault name or https://name.vault.azure.net. Vaults pinned in the tree are listed." />
+                    <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="Secret name" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding CredentialSecret, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}"
+                             ToolTip="The secret's value is the password. A 'username' tag on the secret names the account; otherwise the user name above is used." />
+                    <TextBlock Grid.Row="3" Style="{StaticResource Label}" Text="Vault tenant" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding CredentialTenant, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" ToolTip="Optional. Only when the vault is in another tenant." />
+                    <TextBlock Grid.Row="4" Style="{StaticResource Label}" Text="1Password item" Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding OnePasswordItem, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}"
+                             ToolTip="Item name or id, or paste its op://vault/item reference (Copy Secret Reference in 1Password). The item's username and password fields are used." />
+                    <TextBlock Grid.Row="5" Style="{StaticResource Label}" Text="1Password vault" Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="5" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding OnePasswordVault, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}"
+                             ToolTip="Optional. Vault name or id; narrows the search and avoids two items with the same name clashing." />
+                    <TextBlock Grid.Row="6" Style="{StaticResource Label}" Text="1Password account" Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="6" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding OnePasswordAccount, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}"
+                             ToolTip="Optional. Only when the 1Password app has more than one account: its sign in address (my.1password.com), email or id." />
+
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource Muted}" FontSize="11" Margin="0,0,0,4" TextWrapping="Wrap"
+                               Visibility="{Binding ShowCredentialNote, Converter={StaticResource BoolToVis}}"
+                               Text="The password is read each time the session connects and is never written to disk." />
+
+                    <TextBlock Grid.Row="8" Style="{StaticResource Label}" Text="Protection" />
+                    <ComboBox Grid.Row="8" Grid.Column="1" Margin="0,3" ItemsSource="{Binding ProtectionChoices}" SelectedItem="{Binding SelectedProtection}" DisplayMemberPath="Label" />
+
+                    <TextBlock Grid.Row="9" Style="{StaticResource Label}" Text="RD Gateway" />
+                    <Grid Grid.Row="9" Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Style="{StaticResource Field}" Text="{Binding GatewayHost, UpdateSourceTrigger=PropertyChanged}" ToolTip="Gateway host name. Blank = inherit, then none. With a host set and usage left on Inherit, the gateway is always used." />
+                        <ComboBox Grid.Column="2" Margin="0,3" ItemsSource="{Binding GatewayChoices}" SelectedItem="{Binding SelectedGateway}" DisplayMemberPath="Label" />
+                    </Grid>
+                </Grid>
+            </StackPanel>
+
+            <!-- Server checks (plugin) -->
+            <StackPanel Visibility="{Binding ShowRdpFields, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="Server checks" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Services to watch" />
+                    <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding WatchedServices, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True" TextWrapping="NoWrap" MinLines="3" MaxLines="8" VerticalScrollBarVisibility="Auto"
+                             VerticalContentAlignment="Top"
+                             ToolTip="One per line. Use the service name (W3SVC) or the display name (World Wide Web Publishing Service). * and ? are wildcards, for example MSSQL*. Blank = inherit from the folder." />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource Muted}" FontSize="11" Margin="0,0,0,4" TextWrapping="Wrap"
+                               Text="One per line. Service name or display name both work; * and ? are wildcards. Check services always lists these, plus any automatic service that is not running." />
+                </Grid>
+            </StackPanel>
+
+            <!-- Terminal -->
+            <StackPanel Visibility="{Binding IsTerminal, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="Terminal" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Shell" />
+                    <ComboBox Grid.Column="1" Margin="0,3" ItemsSource="{Binding Shells}" SelectedItem="{Binding Shell}" />
+                    <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Working directory" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding WorkingDirectory, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="Arguments" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Grid.Row="3" Style="{StaticResource Label}" Text="Start script" VerticalAlignment="Top" Margin="0,8,12,0" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding StartScript, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True" MinHeight="70" MaxHeight="160" TextWrapping="NoWrap"
+                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top" FontFamily="{StaticResource Font.Mono}" />
+                </Grid>
+            </StackPanel>
+
+            <!-- SSH and telnet -->
+            <StackPanel Visibility="{Binding IsSsh, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="SSH or telnet" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="90" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Protocol" />
+                    <ComboBox Grid.Column="1" Grid.ColumnSpan="3" Margin="0,3" ItemsSource="{Binding ProtocolChoices}" SelectedItem="{Binding SelectedProtocol}" DisplayMemberPath="Label" AutomationProperties.Name="Protocol" />
+
+                    <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Host" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Host, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Name or IP address of the switch, router or server" AutomationProperties.Name="Host" />
+                    <TextBlock Grid.Row="1" Grid.Column="2" Style="{StaticResource Label}" Text="Port" Margin="12,0" />
+                    <TextBox Grid.Row="1" Grid.Column="3" Style="{StaticResource Field}" Text="{Binding SshPort, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="{Binding SshPortHint}" AutomationProperties.Name="Port" />
+
+                    <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="User name" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource Field}" Text="{Binding SshUserName, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Blank = the folder's SSH user name. With none set, ssh uses your Windows user name and telnet leaves it to the device prompt."
+                             AutomationProperties.Name="User name" />
+
+                    <TextBlock Grid.Row="3" Style="{StaticResource Label}" Text="Key file" Visibility="{Binding IsSshProtocol, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource Field}" Text="{Binding IdentityFile, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding IsSshProtocol, Converter={StaticResource BoolToVis}}" AutomationProperties.Name="Key file"
+                             ToolTip="Optional private key for ssh -i, for example %USERPROFILE%\.ssh\id_ed25519. Blank uses ssh-agent and your default keys." />
+                    <TextBlock Grid.Row="4" Style="{StaticResource Label}" Text="Jump host" Visibility="{Binding IsSshProtocol, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource Field}" Text="{Binding JumpHost, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding IsSshProtocol, Converter={StaticResource BoolToVis}}" AutomationProperties.Name="Jump host"
+                             ToolTip="Optional. Connect through this host first (ssh -J), for example admin@bastion.contoso.local." />
+                    <TextBlock Grid.Row="5" Style="{StaticResource Label}" Text="Extra arguments" Visibility="{Binding IsSshProtocol, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource Field}" Text="{Binding SshArguments, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding IsSshProtocol, Converter={StaticResource BoolToVis}}" AutomationProperties.Name="Extra arguments"
+                             ToolTip="Optional ssh.exe arguments, placed before the host. For example -o ServerAliveInterval=30" />
+                    <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,6,0,0" IsChecked="{Binding LegacyAlgorithms}"
+                              Visibility="{Binding IsSshProtocol, Converter={StaticResource BoolToVis}}"
+                              Content="Allow old algorithms (for older switches and routers)"
+                              ToolTip="Turns on old key exchange, host key, cipher and MAC algorithms (SHA-1, CBC, ssh-rsa) that OpenSSH switches off. Only tick this for a device that will not connect without it." />
+                </Grid>
+                <TextBlock Style="{StaticResource Muted}" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Text="SSH runs Windows' own ssh.exe, so host keys, known_hosts, keys and ssh-agent work as usual. Telnet is not encrypted." />
+            </StackPanel>
+
+            <!-- SSH defaults on a folder -->
+            <StackPanel Visibility="{Binding IsFolder, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="SSH and telnet defaults" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="User name" />
+                    <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding SshUserName, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="User name for SSH and telnet entries in this folder. Separate from the RDP user name above." AutomationProperties.Name="SSH user name" />
+                </Grid>
+            </StackPanel>
+
+            <!-- Send password credential (SSH, telnet, folders) -->
+            <Border Visibility="{Binding ShowSshCredential, Converter={StaticResource BoolToVis}}">
+            <StackPanel DataContext="{Binding SshCredential}">
+                <TextBlock Style="{StaticResource Section}" Text="Send password (SSH and telnet)" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Credential" />
+                    <ComboBox Grid.Column="1" Margin="0,3" ItemsSource="{Binding Choices}" SelectedItem="{Binding Selected}" DisplayMemberPath="Label"
+                              AutomationProperties.Name="Send password credential" />
+                    <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Vault" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" />
+                    <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,3" IsEditable="True" ItemsSource="{Binding KnownVaults}"
+                              Text="{Binding Vault, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}"
+                              ToolTip="Vault name or https://name.vault.azure.net. Vaults pinned in the tree are listed." />
+                    <TextBlock Grid.Row="2" Style="{StaticResource Label}" Text="Secret name" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Secret, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}"
+                             ToolTip="The secret's value is the password. A 'username' tag on the secret is used by Send user name." />
+                    <TextBlock Grid.Row="3" Style="{StaticResource Label}" Text="Vault tenant" Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Tenant, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowVaultFields, Converter={StaticResource BoolToVis}}" ToolTip="Optional. Only when the vault is in another tenant." />
+                    <TextBlock Grid.Row="4" Style="{StaticResource Label}" Text="1Password item" Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding OnePasswordItem, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}"
+                             ToolTip="Item name or id, or its op://vault/item reference. The item's password field is typed; its username field is used by Send user name." />
+                    <TextBlock Grid.Row="5" Style="{StaticResource Label}" Text="1Password vault" Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="5" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding OnePasswordVault, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" ToolTip="Optional. Narrows the search." />
+                    <TextBlock Grid.Row="6" Style="{StaticResource Label}" Text="1Password account" Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="6" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding OnePasswordAccount, UpdateSourceTrigger=PropertyChanged}"
+                             Visibility="{Binding ShowOnePasswordFields, Converter={StaticResource BoolToVis}}" ToolTip="Optional. Only with more than one account in the 1Password app." />
+                    <TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource Muted}" FontSize="11" Margin="0,2,0,4" TextWrapping="Wrap"
+                               Text="Nothing is stored: the terminal's Send password button reads it, types it at the prompt and forgets it. It is masked in the session log." />
+                </Grid>
+            </StackPanel>
+            </Border>
+
+            <!-- Website -->
+            <StackPanel Visibility="{Binding IsWeb, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="Website" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Address" />
+                    <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Address"
+                             ToolTip="https://fw01.contoso.local or http://10.0.11.10/reports. A bare name gets https:// in front." />
+                    <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Opens in" />
+                    <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,3" ItemsSource="{Binding OpenInChoices}" SelectedItem="{Binding SelectedOpenIn}" DisplayMemberPath="Label"
+                              AutomationProperties.Name="Opens in" />
+                    <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource Muted}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap"
+                               Text="What double click and Connect do. Right click the entry to open it the other way." />
+                </Grid>
+            </StackPanel>
+
+            <!-- Session log -->
+            <StackPanel Visibility="{Binding ShowSessionLogging, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="Session log" />
+                <CheckBox Style="{StaticResource Tri}" IsChecked="{Binding SessionLogging}" Content="Log sessions to a text file"
+                          ToolTip="Tick = log, untick = do not log, dash = inherit from the folder, then Settings (on by default)" />
+                <TextBlock Style="{StaticResource Muted}" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap"
+                           Text="A plain text record of what was shown, kept on this PC (folder and retention in Settings). Passwords and secrets RCM recognises are masked; turn this off for work that prints secrets on their own." />
+            </StackPanel>
+
+            <!-- Key Vault -->
+            <StackPanel Visibility="{Binding IsKeyVault, Converter={StaticResource BoolToVis}}">
+                <TextBlock Style="{StaticResource Section}" Text="Key Vault" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource Label}" Text="Vault URI" />
+                    <TextBox Grid.Column="1" Style="{StaticResource Field}" Text="{Binding VaultUri, UpdateSourceTrigger=PropertyChanged}" ToolTip="https://name.vault.azure.net" />
+                    <TextBlock Grid.Row="1" Style="{StaticResource Label}" Text="Tenant ID" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource Field}" Text="{Binding TenantId, UpdateSourceTrigger=PropertyChanged}" ToolTip="Optional" />
+                </Grid>
+            </StackPanel>
+
+            <TextBlock Text="{Binding ValidationMessage}" Foreground="{StaticResource Chrome.Danger}" Margin="0,12,0,0"
+                       Visibility="{Binding ValidationMessage, Converter={StaticResource StringToVis}}" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                <Button Content="Cancel" IsCancel="True" MinWidth="90" />
+                <Button Content="Save" IsDefault="True" Style="{StaticResource AccentButton}" MinWidth="90" Margin="8,0,0,0" Click="Save_Click" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

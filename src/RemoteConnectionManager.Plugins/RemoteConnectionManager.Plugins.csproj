@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Plugin contracts. In-box plugins (Key Vault, 1Password, Server checks) implement these and ship
+       with the app, signed with it. No assembly loading from a folder: the PAW's ASR rule would block
+       unsigned DLLs anyway. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>RemoteConnectionManager.Plugins</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RemoteConnectionManager.Core\RemoteConnectionManager.Core.csproj" />
+  </ItemGroup>
+</Project>

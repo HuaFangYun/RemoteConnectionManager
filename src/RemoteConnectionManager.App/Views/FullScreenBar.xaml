@@ -1,0 +1,23 @@
+<Window x:Class="RemoteConnectionManager.App.Views.FullScreenBar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:RemoteConnectionManager.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DataContext="{d:DesignInstance Type=vm:RdpSessionTabViewModel}"
+        Title="RCM full screen" WindowStyle="None" ResizeMode="NoResize" Topmost="True" ShowInTaskbar="False" ShowActivated="False"
+        SizeToContent="WidthAndHeight" Style="{StaticResource DarkWindow}" Background="{StaticResource Chrome.Panel}">
+    <Border BorderBrush="{StaticResource Chrome.Accent}" BorderThickness="1,0,1,2" Padding="6,2">
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Style="{StaticResource Glyph}" Text="&#xE7F4;" Margin="4,0,8,0" Foreground="{StaticResource Chrome.TextMuted}" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding TargetText}" Style="{StaticResource Muted}" FontSize="11" VerticalAlignment="Center" Margin="8,0,12,0" />
+            <Rectangle Width="1" Margin="4,6" Fill="{StaticResource Chrome.Border}" />
+            <ToggleButton Style="{StaticResource ToggleIconButton}" Content="&#xE765;" ToolTip="Keyboard pass through"
+                          IsChecked="{Binding KeyboardPassThrough, Mode=OneWay}" Command="{Binding ToggleKeyboardCommand}" />
+            <Button Style="{StaticResource IconButton}" Content="&#xE7F4;" ToolTip="Move to another display" Click="Displays_Click" />
+            <Button Style="{StaticResource IconButton}" Content="&#xE73F;" ToolTip="Leave full screen" Command="{Binding ExitFullScreenCommand}" />
+            <Button Style="{StaticResource IconButton}" Content="&#xE8BB;" ToolTip="Disconnect" Command="{Binding DisconnectCommand}" Foreground="{StaticResource Chrome.Danger}" />
+        </StackPanel>
+    </Border>
+</Window>

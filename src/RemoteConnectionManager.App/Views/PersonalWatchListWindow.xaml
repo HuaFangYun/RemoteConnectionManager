@@ -1,0 +1,30 @@
+<Window x:Class="RemoteConnectionManager.App.Views.PersonalWatchListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="My watched services" Width="520" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Style="{StaticResource DarkWindow}">
+    <StackPanel Margin="20,16">
+        <TextBlock x:Name="TitleText" FontWeight="SemiBold" TextWrapping="Wrap" />
+        <TextBlock x:Name="IntroText" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,12" FontSize="12" />
+
+        <TextBlock Text="Shared list (set on the entry or its folders)" Style="{StaticResource Muted}" FontSize="11" />
+        <Border Background="{StaticResource Chrome.Panel}" BorderBrush="{StaticResource Chrome.Border}" BorderThickness="1" CornerRadius="3" Padding="8,6" Margin="0,4,0,12">
+            <TextBlock x:Name="SharedText" TextWrapping="Wrap" FontSize="12" />
+        </Border>
+
+        <TextBlock Text="My services" Style="{StaticResource Muted}" FontSize="11" />
+        <TextBox x:Name="MineBox" AcceptsReturn="True" TextWrapping="NoWrap" MinLines="4" MaxLines="10" VerticalScrollBarVisibility="Auto"
+                 VerticalContentAlignment="Top" Margin="0,4,0,4" AutomationProperties.Name="My services"
+                 ToolTip="One per line. Service name (W3SVC) or display name; * and ? are wildcards." />
+        <TextBlock Style="{StaticResource Muted}" FontSize="11" TextWrapping="Wrap"
+                   Text="One per line. Service name or display name both work; * and ? are wildcards. On a folder they apply to every host beneath it." />
+        <CheckBox x:Name="ReplaceBox" Margin="0,12,0,0" Content="Use only my list here (ignore the shared list)" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button Content="Clear mine" MinWidth="90" Click="Clear_Click" ToolTip="Remove your own settings for this item" />
+            <Button Content="Cancel" IsCancel="True" MinWidth="90" Margin="8,0,0,0" />
+            <Button Content="Save" IsDefault="True" Style="{StaticResource AccentButton}" MinWidth="90" Margin="8,0,0,0" Click="Save_Click" />
+        </StackPanel>
+    </StackPanel>
+</Window>

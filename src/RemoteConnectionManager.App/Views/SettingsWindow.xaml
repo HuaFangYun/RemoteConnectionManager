@@ -1,0 +1,144 @@
+<Window x:Class="RemoteConnectionManager.App.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:RemoteConnectionManager.App.Views"
+        Title="Settings" Width="660" SizeToContent="Height" MaxHeight="860"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Style="{StaticResource DarkWindow}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20,16">
+            <TextBlock Text="Storage" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,8"
+                       Text="Where your connections live. A local file is just for you (or a OneDrive or git folder you sync). SQL Server is shared: groups decide who sees which folders, and each person's preferences and watched services are kept against them." />
+            <ComboBox x:Name="StorageBox" SelectionChanged="StorageBox_SelectionChanged" AutomationProperties.Name="Storage">
+                <ComboBoxItem Content="Local file (connections.json)" />
+                <ComboBoxItem Content="SQL Server (shared with your team)" />
+            </ComboBox>
+
+            <StackPanel x:Name="FilePanel" Margin="0,10,0,0">
+                <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,0,0,8" FontSize="12"
+                           Text="Leave blank for the default under %APPDATA%\RemoteConnectionManager, or point at a folder that OneDrive or git syncs. The file is created if it does not exist." />
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Browse" Margin="8,0,0,0" Click="Browse_Click" />
+                    <Button DockPanel.Dock="Right" Content="Use default" Margin="8,0,0,0" Click="UseDefault_Click" />
+                    <TextBox x:Name="PathBox" AutomationProperties.Name="Connections file path" />
+                </DockPanel>
+                <TextBlock x:Name="DefaultText" Style="{StaticResource Muted}" FontSize="11" Margin="0,6,0,0" />
+            </StackPanel>
+
+            <StackPanel x:Name="SqlPanel" Margin="0,10,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Server" Style="{StaticResource Muted}" VerticalAlignment="Center" />
+                    <TextBox x:Name="ServerBox" Grid.Column="1" Margin="0,3" AutomationProperties.Name="SQL Server"
+                             ToolTip="Server name, server\instance, or name.database.windows.net for Azure SQL" />
+                    <TextBlock Grid.Row="1" Text="Database" Style="{StaticResource Muted}" VerticalAlignment="Center" />
+                    <TextBox x:Name="DatabaseBox" Grid.Row="1" Grid.Column="1" Margin="0,3" AutomationProperties.Name="Database" />
+                    <TextBlock Grid.Row="2" Text="Sign in" Style="{StaticResource Muted}" VerticalAlignment="Center" />
+                    <ComboBox x:Name="AuthBox" Grid.Row="2" Grid.Column="1" Margin="0,3" AutomationProperties.Name="Sign in">
+                        <ComboBoxItem Content="Windows (logged on user)" />
+                        <ComboBoxItem Content="Microsoft Entra (signed in account)" />
+                        <ComboBoxItem Content="Microsoft Entra (sign in window)" />
+                    </ComboBox>
+                    <CheckBox x:Name="TrustCertBox" Grid.Row="3" Grid.Column="1" Margin="0,6,0,0"
+                              Content="Trust the server certificate (only for a self signed certificate)" />
+                    <TextBlock Grid.Row="4" Text="Check every" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="0,6,0,0" />
+                    <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,6,0,0">
+                        <TextBox x:Name="PollSecondsBox" Width="60" AutomationProperties.Name="Check for changes every, in seconds"
+                                 ToolTip="How often RCM checks the database for other people's changes and for a lost connection" />
+                        <TextBlock Text="seconds (10 to 3600) for changes and a lost connection" Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    </StackPanel>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <Button x:Name="TestButton" Content="Test connection" Click="TestSql_Click" />
+                    <Button x:Name="UpgradeButton" Content="Create or upgrade tables" Margin="8,0,0,0" Click="UpgradeSql_Click"
+                            ToolTip="Needs db_owner on the database. Whoever creates the tables becomes the first RCM admin." />
+                    <Button x:Name="CopyButton" Content="Copy a file into the database" Margin="8,0,0,0" Click="CopyIntoSql_Click"
+                            ToolTip="Adds every folder and entry from a connections.json file. Needs RCM admin." />
+                </StackPanel>
+                <TextBlock x:Name="SqlStatusText" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="12" />
+                <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="11"
+                           Text="No passwords are stored. The database admin gives people access by adding a login (or an AD group) to the rcm_user role. RCM admins then manage groups and folder permissions in Users and groups." />
+            </StackPanel>
+
+            <TextBlock Text="Session logs" FontWeight="SemiBold" Margin="0,20,0,0" />
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,8"
+                       Text="A plain text record of each PowerShell, cmd, SSH and telnet tab, so you can look back at what was done. Kept on this PC only, never in the shared database. Entries and folders can switch it on or off for themselves." />
+            <CheckBox x:Name="LogEnabledBox" Content="Log sessions unless an entry or folder says otherwise" AutomationProperties.Name="Log sessions" />
+            <CheckBox x:Name="LogRedactBox" Margin="0,6,0,0" AutomationProperties.Name="Mask secrets in session logs"
+                      Content="Mask passwords, secrets, SNMP communities and keys (Cisco, HP, connection strings, tokens)" />
+            <CheckBox x:Name="LogRawBox" Margin="0,6,0,0" AutomationProperties.Name="Keep raw copy"
+                      Content="Also keep a raw copy with colours (.vt file, not masked)"
+                      ToolTip="The raw terminal output, for replaying with colours. It is NOT masked, so it can contain secrets the text log hides." />
+            <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="110" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition /><RowDefinition /><RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock Text="Folder" Style="{StaticResource Muted}" VerticalAlignment="Center" />
+                <DockPanel Grid.Column="1" Margin="0,3">
+                    <Button DockPanel.Dock="Right" Content="Open" Margin="8,0,0,0" Click="OpenLogFolder_Click" />
+                    <Button DockPanel.Dock="Right" Content="Browse" Margin="8,0,0,0" Click="BrowseLogFolder_Click" />
+                    <Button DockPanel.Dock="Right" Content="Use default" Margin="8,0,0,0" Click="DefaultLogFolder_Click" />
+                    <TextBox x:Name="LogFolderBox" AutomationProperties.Name="Session log folder" />
+                </DockPanel>
+                <TextBlock x:Name="LogDefaultText" Grid.Row="1" Grid.Column="1" Style="{StaticResource Muted}" FontSize="11" Margin="0,2,0,4" TextWrapping="Wrap" />
+                <TextBlock Grid.Row="2" Text="Keep for" Style="{StaticResource Muted}" VerticalAlignment="Center" />
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,3">
+                    <TextBox x:Name="LogKeepDaysBox" Width="60" AutomationProperties.Name="Keep session logs for, in days" />
+                    <TextBlock Text="days (0 keeps them forever). Older logs are deleted when RCM starts." Style="{StaticResource Muted}" VerticalAlignment="Center" Margin="8,0,0,0" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="Plugins" FontWeight="SemiBold" Margin="0,20,0,0" />
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,8"
+                       Text="Plugins ship with RCM. Switching one off hides what it adds; connections that use it keep their settings." />
+            <ItemsControl x:Name="PluginList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type views:PluginRow}">
+                        <Border Background="{StaticResource Chrome.Panel}" BorderBrush="{StaticResource Chrome.Border}" BorderThickness="1" CornerRadius="4" Padding="12,8" Margin="0,0,0,6">
+                            <StackPanel>
+                                <CheckBox IsChecked="{Binding Enabled}" FontWeight="SemiBold" Content="{Binding Name}" AutomationProperties.Name="{Binding Name}" />
+                                <TextBlock Text="{Binding Description}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="22,4,0,0" FontSize="12" />
+                                <StackPanel Orientation="Horizontal" Margin="22,4,0,0">
+                                    <Ellipse x:Name="Dot" Width="7" Height="7" Fill="{StaticResource Chrome.TextMuted}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                    <TextBlock Text="{Binding Status}" TextWrapping="Wrap" FontSize="11" MaxWidth="540" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Ready}" Value="True">
+                                <Setter TargetName="Dot" Property="Fill" Value="{StaticResource Chrome.Ok}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Ready}" Value="False">
+                                <Setter TargetName="Dot" Property="Fill" Value="{StaticResource Chrome.Warn}" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="1Password CLI" FontWeight="SemiBold" Margin="0,12,0,0" />
+            <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,8"
+                       Text="Leave blank to find op.exe in the usual places (winget, Program Files, PATH). In the 1Password app turn on Settings > Developer > Integrate with 1Password CLI, so the CLI asks the app to unlock." />
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Browse" Margin="8,0,0,0" Click="BrowseOp_Click" />
+                <TextBox x:Name="OpPathBox" />
+            </DockPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                <Button Content="Cancel" IsCancel="True" MinWidth="90" />
+                <Button Content="Save" IsDefault="True" Style="{StaticResource AccentButton}" MinWidth="90" Margin="8,0,0,0" Click="Save_Click" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
