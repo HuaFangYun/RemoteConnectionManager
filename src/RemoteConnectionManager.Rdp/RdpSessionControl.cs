@@ -119,7 +119,8 @@ public sealed class RdpSessionControl : UserControl
         var adv = _rdp.AdvancedSettings9;
         adv.RDPPort = settings.Port;
         adv.EnableCredSspSupport = true;
-        adv.AuthenticationLevel = 2;
+        // 2 = warn when the server cannot be verified (the mstsc prompt); 0 = connect without asking.
+        adv.AuthenticationLevel = settings.IgnoreCertificateErrors ? 0u : 2u;
         adv.RedirectClipboard = settings.RedirectClipboard;
         adv.RedirectDrives = false;
         adv.RedirectPrinters = false;

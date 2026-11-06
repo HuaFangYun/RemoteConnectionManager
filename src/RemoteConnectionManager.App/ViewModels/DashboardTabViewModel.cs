@@ -106,6 +106,7 @@ public sealed partial class DashboardTabViewModel : TabViewModelBase
             if (d.KeyboardPassThrough is { } kb) rows.Add(new("Keyboard pass through", kb ? "Yes" : "No"));
             if (d.RedirectClipboard is { } clip) rows.Add(new("Clipboard", clip ? "Yes" : "No"));
             if (d.SmartSizing is { } smart) rows.Add(new("Smart sizing", smart ? "Yes" : "No"));
+            if (d.IgnoreCertificateErrors is { } certs) rows.Add(new("Certificate errors", certs ? "Ignored" : "Ask"));
             if (d.Credential is { } cred) rows.Add(new("Credential", DescribeCredential(cred.Source == CredentialSource.Windows ? null : cred, null)));
             if (d.WatchedServices is { } watched) rows.Add(new("Watched services", watched.Count == 0 ? "none" : string.Join(", ", watched)));
             if (d.CredentialProtection is { } protection) rows.Add(new("Protection", DescribeProtection(protection)));
@@ -147,6 +148,7 @@ public sealed partial class DashboardTabViewModel : TabViewModelBase
                     new PropertyRow("Keyboard pass through", s.KeyboardPassThrough ? "Yes" : "No"),
                     new PropertyRow("Clipboard", s.RedirectClipboard ? "Yes" : "No"),
                     new PropertyRow("Resize", s.SmartSizing ? "Smart sizing (scaled)" : "Live resize"),
+                    new PropertyRow("Certificate errors", s.IgnoreCertificateErrors ? "Ignored, connects without asking" : "Ask"),
                     new PropertyRow("Tags", entry.Tags.Count == 0 ? "none" : string.Join(", ", entry.Tags)),
                 };
                 break;

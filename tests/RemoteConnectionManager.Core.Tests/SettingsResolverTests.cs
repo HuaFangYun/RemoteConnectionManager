@@ -26,6 +26,20 @@ public class SettingsResolverTests
     }
 
     [Fact]
+    public void IgnoreCertificateErrorsInheritsAndEntryCanSwitchItOff()
+    {
+        var folder = new ConnectionFolder { Name = "lab", Defaults = new ConnectionDefaults { IgnoreCertificateErrors = true } };
+
+        Assert.False(SettingsResolver.Resolve(new RdpConnection { Host = "h" }, Array.Empty<ConnectionFolder>(), new ConnectionDefaults()).IgnoreCertificateErrors);
+        Assert.True(SettingsResolver.Resolve(new RdpConnection { Host = "h" }, new[] { folder }, new ConnectionDefaults()).IgnoreCertificateErrors);
+        Assert.False(SettingsResolver.Resolve(new RdpConnection { Host = "h", IgnoreCertificateErrors = false }, new[] { folder }, new ConnectionDefaults()).IgnoreCertificateErrors);
+
+        var copy = (RdpConnection)new RdpConnection { Host = "h", IgnoreCertificateErrors = true }.Clone();
+        Assert.True(copy.IgnoreCertificateErrors);
+        Assert.False(folder.Defaults.IsEmpty);
+    }
+
+    [Fact]
     public void BuiltInDefaultsApplyWhenNothingSet()
     {
         var s = SettingsResolver.Resolve(new RdpConnection { Host = " host " }, Array.Empty<ConnectionFolder>(), new ConnectionDefaults());

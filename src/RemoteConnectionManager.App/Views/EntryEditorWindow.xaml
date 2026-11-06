@@ -125,6 +125,8 @@
                     <CheckBox Style="{StaticResource Tri}" Content="Keyboard pass through" IsChecked="{Binding KeyboardPassThrough}" />
                     <CheckBox Style="{StaticResource Tri}" Content="Clipboard" IsChecked="{Binding RedirectClipboard}" />
                     <CheckBox Style="{StaticResource Tri}" Content="Smart sizing (scale, no live resize)" IsChecked="{Binding SmartSizing}" />
+                    <CheckBox Style="{StaticResource Tri}" Content="Ignore certificate errors" IsChecked="{Binding IgnoreCertificateErrors}"
+                              ToolTip="Connect without the 'identity of the remote computer cannot be verified' prompt. Use for internal hosts with self signed RDP certificates, not for hosts reached over the internet." />
                 </UniformGrid>
 
                 <!-- Sign in, credential protection and gateway -->

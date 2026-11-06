@@ -69,6 +69,7 @@ public sealed partial class EntryEditorViewModel : ObservableObject
     [ObservableProperty] private bool? _keyboardPassThrough;
     [ObservableProperty] private bool? _redirectClipboard;
     [ObservableProperty] private bool? _smartSizing;
+    [ObservableProperty] private bool? _ignoreCertificateErrors;
 
     // Sign in, gateway and credential protection (RDP and folder defaults)
     [ObservableProperty]
@@ -262,6 +263,7 @@ public sealed partial class EntryEditorViewModel : ObservableObject
             KeyboardPassThrough = d.KeyboardPassThrough,
             RedirectClipboard = d.RedirectClipboard,
             SmartSizing = d.SmartSizing,
+            IgnoreCertificateErrors = d.IgnoreCertificateErrors,
         };
         vm.OfferSources(enabledSources, d.Credential?.Source);
         vm.LoadSignIn(d.Credential, d.CredentialProtection, d.GatewayHost, d.GatewayUsage, d.WatchedServices);
@@ -303,6 +305,7 @@ public sealed partial class EntryEditorViewModel : ObservableObject
                 vm.KeyboardPassThrough = rdp.KeyboardPassThrough;
                 vm.RedirectClipboard = rdp.RedirectClipboard;
                 vm.SmartSizing = rdp.SmartSizing;
+                vm.IgnoreCertificateErrors = rdp.IgnoreCertificateErrors;
                 vm.OfferSources(enabledSources, rdp.Credential?.Source);
                 vm.LoadSignIn(rdp.Credential, rdp.CredentialProtection, rdp.GatewayHost, rdp.GatewayUsage, rdp.WatchedServices);
                 break;
@@ -382,6 +385,7 @@ public sealed partial class EntryEditorViewModel : ObservableObject
         folder.Defaults.KeyboardPassThrough = KeyboardPassThrough;
         folder.Defaults.RedirectClipboard = RedirectClipboard;
         folder.Defaults.SmartSizing = SmartSizing;
+        folder.Defaults.IgnoreCertificateErrors = IgnoreCertificateErrors;
         folder.Defaults.Credential = BuildCredential();
         folder.Defaults.CredentialProtection = SelectedProtection.Value;
         folder.Defaults.GatewayHost = Blank(GatewayHost);
@@ -411,6 +415,7 @@ public sealed partial class EntryEditorViewModel : ObservableObject
                 rdp.KeyboardPassThrough = KeyboardPassThrough;
                 rdp.RedirectClipboard = RedirectClipboard;
                 rdp.SmartSizing = SmartSizing;
+                rdp.IgnoreCertificateErrors = IgnoreCertificateErrors;
                 rdp.Credential = BuildCredential();
                 rdp.CredentialProtection = SelectedProtection.Value;
                 rdp.GatewayHost = Blank(GatewayHost);

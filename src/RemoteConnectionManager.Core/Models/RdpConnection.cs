@@ -18,6 +18,8 @@ public sealed class RdpConnection : ConnectionEntry
     public bool? KeyboardPassThrough { get; set; }
     public bool? RedirectClipboard { get; set; }
     public bool? SmartSizing { get; set; }
+    /// <summary>Skip the server certificate prompt. Null inherits from the folder chain, then off.</summary>
+    public bool? IgnoreCertificateErrors { get; set; }
     /// <summary>Null inherits from the folder chain. Source Windows opts out of an inherited vault credential.</summary>
     public CredentialReference? Credential { get; set; }
     public CredentialProtection? CredentialProtection { get; set; }
@@ -43,6 +45,7 @@ public sealed class RdpConnection : ConnectionEntry
             KeyboardPassThrough = KeyboardPassThrough,
             RedirectClipboard = RedirectClipboard,
             SmartSizing = SmartSizing,
+            IgnoreCertificateErrors = IgnoreCertificateErrors,
             Credential = Credential?.Clone(),
             CredentialProtection = CredentialProtection,
             GatewayHost = GatewayHost,

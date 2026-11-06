@@ -51,6 +51,7 @@ public static class MRemoteNgImporter
                 if (!Bool(node.Attribute("InheritRedirectKeys")?.Value)) folder.Defaults.KeyboardPassThrough = BoolOrNull(node, "RedirectKeys");
                 if (!Bool(node.Attribute("InheritRedirectClipboard")?.Value)) folder.Defaults.RedirectClipboard = BoolOrNull(node, "RedirectClipboard");
                 if (!Bool(node.Attribute("InheritAutomaticResize")?.Value) && BoolOrNull(node, "AutomaticResize") == false) folder.Defaults.SmartSizing = true;
+                if (!Bool(node.Attribute("InheritRDPAuthenticationLevel")?.Value) && Text(node, "RDPAuthenticationLevel") == "NoAuth") folder.Defaults.IgnoreCertificateErrors = true;
 
                 target.Folders.Add(folder);
                 Walk(node, folder, ref imported, ref skipped, notes);
@@ -130,6 +131,7 @@ public static class MRemoteNgImporter
             if (!Bool(node.Attribute("InheritRedirectKeys")?.Value)) rdp.KeyboardPassThrough = BoolOrNull(node, "RedirectKeys");
             if (!Bool(node.Attribute("InheritRedirectClipboard")?.Value)) rdp.RedirectClipboard = BoolOrNull(node, "RedirectClipboard");
             if (!Bool(node.Attribute("InheritAutomaticResize")?.Value) && BoolOrNull(node, "AutomaticResize") == false) rdp.SmartSizing = true;
+            if (!Bool(node.Attribute("InheritRDPAuthenticationLevel")?.Value) && Text(node, "RDPAuthenticationLevel") == "NoAuth") rdp.IgnoreCertificateErrors = true;
 
             var tags = Text(node, "EnvironmentTags");
             if (!string.IsNullOrWhiteSpace(tags))

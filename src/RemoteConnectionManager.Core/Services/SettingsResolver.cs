@@ -71,6 +71,7 @@ public static class SettingsResolver
             GatewayHost = gateway == GatewayUsage.Never ? null : gatewayHost,
             Gateway = gateway,
             WatchedServices = watchList,
+            IgnoreCertificateErrors = Pick(entry.IgnoreCertificateErrors, d => d.IgnoreCertificateErrors) ?? false,
         };
     }
 

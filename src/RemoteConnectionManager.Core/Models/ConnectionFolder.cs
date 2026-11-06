@@ -15,6 +15,8 @@ public sealed class ConnectionDefaults
     public bool? KeyboardPassThrough { get; set; }
     public bool? RedirectClipboard { get; set; }
     public bool? SmartSizing { get; set; }
+    /// <summary>Connect without the "identity of the remote computer cannot be verified" prompt. For lab or internal hosts with self signed RDP certificates.</summary>
+    public bool? IgnoreCertificateErrors { get; set; }
     public CredentialReference? Credential { get; set; }
     public CredentialProtection? CredentialProtection { get; set; }
     public string? GatewayHost { get; set; }
@@ -33,7 +35,7 @@ public sealed class ConnectionDefaults
     [JsonIgnore]
     public bool IsEmpty =>
         Domain is null && UserName is null && Port is null && AdminSession is null &&
-        KeyboardPassThrough is null && RedirectClipboard is null && SmartSizing is null &&
+        KeyboardPassThrough is null && RedirectClipboard is null && SmartSizing is null && IgnoreCertificateErrors is null &&
         Credential is null && CredentialProtection is null && GatewayHost is null && GatewayUsage is null &&
         WatchedServices is null && SshUserName is null && SshCredential is null && SessionLogging is null &&
         IconColour is null;

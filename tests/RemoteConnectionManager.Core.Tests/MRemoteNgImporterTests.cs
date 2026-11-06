@@ -12,7 +12,7 @@ public class MRemoteNgImporterTests
         <mrng:Connections xmlns:mrng="http://mremoteng.org" Name="Connections" Export="false" EncryptionEngine="AES" BlockCipherMode="GCM" KdfIterations="1000" FullFileEncryption="false" Protected="abc" ConfVersion="2.6">
           <Node Name="Client A" Type="Container" Descr="Client A estate" Domain="clienta.local" InheritDomain="false" Username="" Password="" Expanded="true">
             <Node Name="DC01" Type="Connection" Descr="Primary DC" Protocol="RDP" Hostname="dc01.clienta.local" Port="3389" Username="" Password="ENCRYPTEDJUNK" Domain="" InheritDomain="true" InheritPort="false" UseConsoleSession="true" InheritUseConsoleSession="false" RedirectKeys="true" InheritRedirectKeys="false" RedirectClipboard="true" InheritRedirectClipboard="false" EnvironmentTags="prod, dc" />
-            <Node Name="APP01" Type="Connection" Protocol="RDP" Hostname="app01.clienta.local" Port="3390" InheritPort="false" Favorite="true" />
+            <Node Name="APP01" Type="Connection" Protocol="RDP" Hostname="app01.clienta.local" Port="3390" InheritPort="false" Favorite="true" RDPAuthenticationLevel="NoAuth" InheritRDPAuthenticationLevel="false" />
             <Node Name="Switch" Type="Connection" Protocol="SSH2" Hostname="sw01" Username="netadmin" InheritUsername="false" />
             <Node Name="Old switch" Type="Connection" Protocol="Telnet" Hostname="sw02" Port="2323" />
             <Node Name="iLO" Type="Connection" Protocol="HTTPS" Hostname="ilo01" Port="8443" />
@@ -47,6 +47,8 @@ public class MRemoteNgImporterTests
         var app = Assert.IsType<RdpConnection>(clientA.Connections[1]);
         Assert.Equal(3390, app.Port);
         Assert.True(app.Favourite);
+        Assert.True(app.IgnoreCertificateErrors);
+        Assert.Null(dc.IgnoreCertificateErrors);
 
         Assert.Single(clientA.Folders);
         Assert.Contains(result.Notes, n => n.Contains("VNC"));

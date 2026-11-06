@@ -28,6 +28,8 @@ public sealed record EffectiveRdpSettings(
     /// <summary>RD Gateway host, or null for a direct connection.</summary>
     public string? GatewayHost { get; init; }
     public GatewayUsage Gateway { get; init; } = GatewayUsage.Never;
+    /// <summary>Connect even when the server certificate cannot be verified, without asking (AuthenticationLevel 0).</summary>
+    public bool IgnoreCertificateErrors { get; init; }
 
     public bool UsesGateway => Gateway != GatewayUsage.Never && !string.IsNullOrWhiteSpace(GatewayHost);
 
