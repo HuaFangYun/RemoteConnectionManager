@@ -36,6 +36,16 @@ public partial class VaultItemEditorWindow : Window
             vm.Name = SafeName(System.IO.Path.GetFileNameWithoutExtension(dialog.FileName));
     }
 
+    private void Generate_Click(object sender, RoutedEventArgs e) =>
+        PasswordGeneratorPanel.Show(GenerateButton, "Use", value =>
+        {
+            if (Vm is not { } vm) return;
+            vm.Value = value;
+            if (string.IsNullOrWhiteSpace(vm.ContentType)) vm.ContentType = "password";
+            ValueBox.Focus();
+            ValueBox.CaretIndex = ValueBox.Text.Length;
+        });
+
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         if (Vm is not { } vm) return;

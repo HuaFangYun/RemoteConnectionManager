@@ -72,6 +72,8 @@
                     <Button Style="{StaticResource CommandBarButton}" Content="&#xE768;" ToolTip="Connect" Command="{Binding ConnectCommand}" Foreground="{StaticResource Chrome.Ok}" />
                     <Button Style="{StaticResource CommandBarButton}" Content="&#xE756;" ToolTip="Open a PowerShell tab (Ctrl+T)" Command="{Binding QuickTerminalCommand}" Foreground="{StaticResource Icon.Terminal}" />
                     <Button Style="{StaticResource CommandBarButton}" Content="&#xE8D7;" ToolTip="Browse Azure Key Vaults (Ctrl+Shift+K)" Command="{Binding OpenAzureBrowserCommand}" Foreground="{StaticResource Icon.Vault}" />
+                    <Button Style="{StaticResource CommandBarButton}" Content="&#xE72E;" ToolTip="Generate a password and copy it (Ctrl+Shift+G)" x:Name="GeneratePasswordButton"
+                            Click="GeneratePassword_Click" Foreground="{StaticResource Icon.Secret}" />
                     <Button x:Name="NewButton" Style="{StaticResource CommandBarButton}" Content="&#xE710;" ToolTip="New entry" Click="DropDownButton_Click" Foreground="{StaticResource Chrome.AccentLight}">
                         <Button.ContextMenu>
                             <ContextMenu>

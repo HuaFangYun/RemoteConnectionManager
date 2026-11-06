@@ -52,7 +52,12 @@
                 <Grid.RowDefinitions>
                     <RowDefinition /><RowDefinition />
                 </Grid.RowDefinitions>
-                <TextBlock Style="{StaticResource TopLabel}" Text="Value" />
+                <StackPanel>
+                    <TextBlock Style="{StaticResource TopLabel}" Text="Value" />
+                    <Button x:Name="GenerateButton" Style="{StaticResource IconButton}" Content="&#xE72E;" HorizontalAlignment="Left" Margin="-8,4,0,0"
+                            Foreground="{StaticResource Icon.Secret}" ToolTip="Generate a password" AutomationProperties.Name="Generate a password"
+                            Click="Generate_Click" />
+                </StackPanel>
                 <TextBox Grid.Column="1" Style="{StaticResource Field}" x:Name="ValueBox" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}"
                          AcceptsReturn="True" TextWrapping="Wrap" Height="96" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto"
                          FontFamily="{StaticResource Font.Mono}" FontSize="12" />

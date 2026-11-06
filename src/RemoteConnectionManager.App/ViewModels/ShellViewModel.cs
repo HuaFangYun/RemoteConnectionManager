@@ -906,6 +906,15 @@ public sealed partial class ShellViewModel : ObservableObject
         try { System.Diagnostics.Process.Start("explorer.exe", AppPaths.LogDirectory); } catch { }
     }
 
+    /// <summary>Puts a value from the password generator on the clipboard, kept out of clipboard history and cleared after 30 seconds.</summary>
+    public void CopyGeneratedPassword(string value)
+    {
+        StatusText = _clipboard.CopySecret(value)
+            ? $"Password copied. The clipboard clears in {ClipboardGuard.ClearAfter.TotalSeconds:0} seconds."
+            : "The clipboard is busy. Try again.";
+        PersistSettings();
+    }
+
     public void PersistSettings()
     {
         _settings.NavigationVisible = NavigationVisible;

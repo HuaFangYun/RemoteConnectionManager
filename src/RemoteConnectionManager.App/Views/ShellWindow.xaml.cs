@@ -37,7 +37,12 @@ public partial class ShellWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
+        if (e.Key == Key.G && Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+        {
+            GeneratePassword_Click(this, e);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
         {
             SearchBox.Focus();
             SearchBox.SelectAll();
@@ -135,6 +140,9 @@ public partial class ShellWindow : Window
     }
 
     private void AzureAccount_Click(object sender, MouseButtonEventArgs e) => _vm.OpenAzureBrowserCommand.Execute(null);
+
+    private void GeneratePassword_Click(object sender, RoutedEventArgs e) =>
+        PasswordGeneratorPanel.Show(GeneratePasswordButton, "Copy", _vm.CopyGeneratedPassword);
 
     private void QuickBox_KeyDown(object sender, KeyEventArgs e)
     {

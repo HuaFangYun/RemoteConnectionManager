@@ -26,6 +26,8 @@ public sealed class AppSettings
     public string? OnePasswordCliPath { get; set; }
     /// <summary>Terminal, SSH and telnet session logs.</summary>
     public SessionLogSettings SessionLogs { get; set; } = new();
+    /// <summary>Last options used in the password generator. Options only; generated values are never saved.</summary>
+    public PasswordOptions PasswordGenerator { get; set; } = new();
 
     [JsonIgnore]
     public string EffectiveConnectionsFile =>
