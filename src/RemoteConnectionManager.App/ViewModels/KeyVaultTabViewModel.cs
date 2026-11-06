@@ -97,7 +97,7 @@ public sealed partial class KeyVaultTabViewModel : TabViewModelBase, IDisposable
         VaultItemKind.Key => "New key",
         _ => "New certificate",
     };
-    public string EmptyText => IsBusy ? string.Empty
+    public string EmptyText => IsBusy || Rows.Count > 0 ? string.Empty
         : _cache.ContainsKey(SelectedKind.Kind) ? (ExpiringOnly ? "Nothing expires in the next 30 days." : FilterText.Length > 0 ? "Nothing matches the filter." : $"This vault has no {SelectedKind.Title.ToLowerInvariant()}.")
         : string.Empty;
 
