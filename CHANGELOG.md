@@ -5,6 +5,8 @@ All notable changes to Remote Connection Manager are listed here. Each release o
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-11
+
 ### Added
 - Silent all users install for MDM tools such as Intune: `setup.exe /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES /NORESTART` installs to `C:\Program Files\RemoteConnectionManager`. The README lists the uninstall command and detection rule.
 - Default settings for new users. A `default-settings.json` in `C:\ProgramData\RemoteConnectionManager` is copied to a user's settings the first time they run RCM, for example to point everyone at the shared SQL database.
@@ -77,6 +79,7 @@ The first release.
   - Installs for the current user or for all users.
   - Needs the .NET 10 Desktop Runtime (x64).
 
-[Unreleased]: https://github.com/jamtheradar/RemoteConnectionManager/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jamtheradar/RemoteConnectionManager/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/jamtheradar/RemoteConnectionManager/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jamtheradar/RemoteConnectionManager/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jamtheradar/RemoteConnectionManager/releases/tag/v0.1.0

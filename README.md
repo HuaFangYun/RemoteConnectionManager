@@ -138,12 +138,12 @@ Values for `authentication`: `windows`, `entra`, `entraInteractive`. Plugin ids 
 To build the installer yourself, install Inno Setup 6 (`winget install JRSoftware.InnoSetup`), then run:
 
 ```
-./build/build-installer.ps1 -Version 0.2.0
+./build/build-installer.ps1 -Version 0.3.0
 ```
 
 The setup exe lands in `artifacts/installer`. The `Build` GitHub Actions workflow does the same on
 every push and pull request (download it from the run's artifacts), and publishes a release when
-you push a tag such as `v0.2.0`.
+you push a tag such as `v0.3.0`.
 
 ## Connections file
 
