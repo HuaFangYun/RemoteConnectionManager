@@ -15,7 +15,7 @@ public sealed class AppSettings
     /// <summary>Personal settings on entries and folders when the file back end is used. SQL Server keeps them per user in the database.</summary>
     public Dictionary<Guid, PersonalEntrySettings> PersonalEntrySettings { get; set; } = new();
 
-    /// <summary>Null means the default file under %APPDATA%.</summary>
+    /// <summary>Null means the default file under %APPDATA%. Environment variables such as %OneDrive% are expanded.</summary>
     public string? ConnectionsFilePath { get; set; }
     public double NavigationWidth { get; set; } = 300;
     public bool NavigationVisible { get; set; } = true;
@@ -31,7 +31,7 @@ public sealed class AppSettings
 
     [JsonIgnore]
     public string EffectiveConnectionsFile =>
-        string.IsNullOrWhiteSpace(ConnectionsFilePath) ? AppPaths.DefaultConnectionsFile : ConnectionsFilePath;
+        string.IsNullOrWhiteSpace(ConnectionsFilePath) ? AppPaths.DefaultConnectionsFile : Environment.ExpandEnvironmentVariables(ConnectionsFilePath.Trim());
 }
 
 /// <summary>How to reach the shared database. No passwords: Windows or Microsoft Entra sign in only.</summary>
@@ -100,22 +100,54 @@ public enum SqlAuthentication
 public sealed class AppSettingsStore
 {
     public string Path { get; }
+    /// <summary>Starting settings for a user who has none yet. Null when there are no defaults to apply.</summary>
+    public string? DefaultsPath { get; }
 
-    public AppSettingsStore(string? path = null)
+    /// <param name="path">The user's settings file. Null means %APPDATA%\RemoteConnectionManager\settings.json.</param>
+    /// <param name="defaultsPath">
+    /// Settings to start from when <paramref name="path"/> does not exist yet. Null means the
+    /// machine wide file in ProgramData, but only when <paramref name="path"/> is also null, so a
+    /// store pointed at a test file never picks up this machine's defaults.
+    /// </param>
+    public AppSettingsStore(string? path = null, string? defaultsPath = null)
     {
         Path = path ?? AppPaths.SettingsFile;
+        DefaultsPath = defaultsPath ?? (path is null ? AppPaths.MachineDefaultSettingsFile : null);
     }
 
     public AppSettings Load()
     {
         try
         {
+            if (!File.Exists(Path)) CopyDefaults();
             if (!File.Exists(Path)) return new AppSettings();
             return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(Path), JsonDefaults.Options) ?? new AppSettings();
         }
         catch
         {
             return new AppSettings();
+        }
+    }
+
+    /// <summary>
+    /// First run only: copy the machine defaults to the user's settings file, so from then on the
+    /// user owns their settings and later changes to the defaults don't overwrite theirs. A
+    /// defaults file that isn't valid settings JSON is ignored.
+    /// </summary>
+    private void CopyDefaults()
+    {
+        if (string.IsNullOrWhiteSpace(DefaultsPath) || !File.Exists(DefaultsPath)) return;
+        try
+        {
+            var json = File.ReadAllText(DefaultsPath);
+            if (JsonSerializer.Deserialize<AppSettings>(json, JsonDefaults.Options) is null) return;
+            var dir = System.IO.Path.GetDirectoryName(Path);
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+            File.WriteAllText(Path, json);
+        }
+        catch
+        {
+            // Unreadable or not settings: start with built in defaults, as if there were no file.
         }
     }
 

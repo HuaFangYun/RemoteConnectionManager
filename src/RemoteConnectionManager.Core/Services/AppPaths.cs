@@ -12,6 +12,13 @@ public static class AppPaths
 
     public static string DefaultConnectionsFile => Path.Combine(RoamingRoot, "connections.json");
     public static string SettingsFile => Path.Combine(RoamingRoot, "settings.json");
+
+    /// <summary>
+    /// Machine wide starting settings, usually put there by an MDM or the installer. Copied to a
+    /// user's <see cref="SettingsFile"/> the first time they run RCM, then never read again for them.
+    /// </summary>
+    public static string MachineDefaultSettingsFile =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), AppFolderName, "default-settings.json");
     public static string LogDirectory => Path.Combine(LocalRoot, "logs");
     public static string SessionLogDirectory => Path.Combine(LocalRoot, "session-logs");
     /// <summary>WebView2 profile (cookies, cache) for website tabs.</summary>

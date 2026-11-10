@@ -68,6 +68,73 @@ default (no admin needed), or for all users under Program Files if you choose th
 page. It needs the [.NET 10 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/10.0)
 and warns you if it's missing. Your connections, settings and logs are kept on upgrade and uninstall.
 
+### Deploying with an MDM
+
+The same setup exe installs silently for all users, always to
+`C:\Program Files\RemoteConnectionManager`. This suits Intune or any tool that runs installers as
+SYSTEM.
+
+| | |
+|---|---|
+| Install | `RemoteConnectionManager-<version>-setup.exe /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES /NORESTART` |
+| Uninstall | `"C:\Program Files\RemoteConnectionManager\unins000.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART` |
+| Detection | Registry `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{6F1C2B7E-4A3D-4E8B-9C21-5D7A0E3F8B14}_is1`, value `DisplayVersion` (string, equals the version), 64 bit view. Or the file `C:\Program Files\RemoteConnectionManager\RemoteConnectionManager.exe` exists. |
+| Return codes | 0 is success. Anything else is a failure. |
+| Install behaviour | System (Intune) |
+
+Notes:
+
+- `/ALLUSERS` is required. Without it setup would install into SYSTEM's own profile, so it
+  refuses and exits with code 1 instead.
+- A newer version installs over the old one in place. Upgrades close a running copy first. User
+  connections, settings and logs are not touched.
+- The installer doesn't install .NET. Deploy the .NET 10 Desktop Runtime (x64) first, for
+  example as an Intune dependency (`winget install Microsoft.DotNet.DesktopRuntime.10`). A silent
+  install without it still succeeds but writes a warning to the log, and the app won't start
+  until the runtime is there.
+- Optional switches: `/MERGETASKS="desktopicon"` adds an all users desktop shortcut, and
+  `/LOG="C:\Windows\Temp\rcm-setup.log"` writes a setup log.
+- On a PAW with the Defender ASR rule mentioned below, exclude
+  `C:\Program Files\RemoteConnectionManager\` (or sign the build).
+
+#### Default settings for new users
+
+Settings are per user (`%APPDATA%\RemoteConnectionManager\settings.json`). To give everyone the
+same starting point, for example the shared SQL database, put a `default-settings.json` in
+`C:\ProgramData\RemoteConnectionManager`. The first time someone runs RCM and has no settings of
+their own, that file is copied to their settings. After that the settings are theirs: later
+changes to the defaults file only reach users who haven't run RCM yet.
+
+The easy way to deploy it is to put `default-settings.json` next to the setup exe in the MDM
+package. An all users install (`/ALLUSERS`) copies it to ProgramData. To use another name or
+place, pass `/DEFAULTSETTINGS="path\to\file.json"` (relative paths are relative to the setup
+exe). If a file named with `/DEFAULTSETTINGS` is missing, setup stops with exit code 1. Uninstall
+leaves the defaults file in place.
+
+It uses the same format as `settings.json`. Leave out anything that should stay at the built in
+default. Comments are allowed. Environment variables work in `connectionsFilePath`. Examples:
+
+```jsonc
+// Shared SQL Server, signed in as the Windows user
+{
+  "storage": "sqlServer",
+  "sql": { "server": "sql01.corp.local", "database": "RemoteConnectionManager", "authentication": "windows" }
+}
+```
+
+```jsonc
+// A connections file in each user's OneDrive, and 1Password switched off
+{
+  "connectionsFilePath": "%OneDrive%\\IT\\connections.json",
+  "disabledPlugins": [ "onepassword" ]
+}
+```
+
+Values for `authentication`: `windows`, `entra`, `entraInteractive`. Plugin ids for
+`disabledPlugins`: `keyvault`, `onepassword`, `serverchecks`.
+
+### Building the installer
+
 To build the installer yourself, install Inno Setup 6 (`winget install JRSoftware.InnoSetup`), then run:
 
 ```

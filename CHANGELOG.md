@@ -5,6 +5,16 @@ All notable changes to Remote Connection Manager are listed here. Each release o
 
 ## [Unreleased]
 
+### Added
+- Silent all users install for MDM tools such as Intune: `setup.exe /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES /NORESTART` installs to `C:\Program Files\RemoteConnectionManager`. The README lists the uninstall command and detection rule.
+- Default settings for new users. A `default-settings.json` in `C:\ProgramData\RemoteConnectionManager` is copied to a user's settings the first time they run RCM, for example to point everyone at the shared SQL database.
+  - The installer puts it there from a `default-settings.json` next to the setup exe, or from `/DEFAULTSETTINGS=<file>`, on all users installs.
+- Environment variables such as `%OneDrive%` now work in the connections file path.
+
+### Changed
+- A silent install no longer asks about a missing .NET 10 Desktop Runtime. It installs anyway and notes it in the setup log.
+- Setup run as SYSTEM without `/ALLUSERS` now stops with exit code 1, rather than installing into the SYSTEM profile where no one can use it.
+
 ## [0.2.0] - 2026-11-06
 
 ### Added
